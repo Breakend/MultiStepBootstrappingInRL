@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 
-def behaviour_policy(Q, s, nA, epsilon=.1):
+def behaviour_policy(Q, s, nA, epsilon=.3):
     """
     Recall that off-policy learning is learning the value function for
     one policy, \pi, while following another policy, \mu. Often, \pi is
@@ -13,28 +13,27 @@ def behaviour_policy(Q, s, nA, epsilon=.1):
     NOTE: taken from https://github.com/dennybritz/reinforcement-learning/blob/master/TD/SARSA.ipynb
     TODO: remove in favour of our own implementation
     """
-    A = np.ones(nA, dtype=float) * epsilon / nA
-    best_action = np.argmax(Q[s][:])
-    A[best_action] += (1.0 - epsilon)
+    A = behaviour_policy_probs(Q, s, nA, epsilon)
     return np.random.choice(range(nA),p= A)
 
-def behaviour_policy_probs(Q, s, nA, epsilon=.1):
+def behaviour_policy_probs(Q, s, nA, epsilon=.3):
     A = np.ones(nA, dtype=float) * epsilon / nA
     best_action = np.argmax(Q[s][:])
     A[best_action] += (1.0 - epsilon)
     return A
 
-def target_policy(Q, s):
-    return np.argmax(Q[s][:])
+def target_policy(Q, s, nA, epsilon=0):
+    A = target_policy_probs(Q, s, nA, epsilon)
+    return np.random.choice(range(nA),p= A)
 
-def target_policy_probs(Q, s, nA, epsilon=0):
+def target_policy_probs(Q, s, nA, epsilon=.1):
     A = np.ones(nA, dtype=float) * epsilon / nA
     best_action = np.argmax(Q[s][:])
     A[best_action] += (1.0 - epsilon)
     return A
 
 
-def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 1):
+def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
     # Initialization
     Q = [[0 for i in range(mdp.A)] for j in range(mdp.S)]
     old_Q = Q
@@ -89,7 +88,7 @@ def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 
                 else:
                     stored_actions[(t+1) % n] = behaviour_policy(Q, s, mdp.A)
 
-            tau = t - n # TODO: +1 here?
+            tau = t - n + 1 # TODO: +1 here?
             if tau >= 0:
                 # product from i = tau+1 to min(tau+n-1, T-1) \pi(A_i | S_i) / \mu(A_i|S_i)
                 # import pdb; pdb.set_trace()

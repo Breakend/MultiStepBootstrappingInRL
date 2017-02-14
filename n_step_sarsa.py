@@ -34,7 +34,7 @@ def target_policy_probs(Q, s, nA, epsilon=0):
     return A
 
 
-def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
+def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 1):
     # Initialization
     Q = [[0 for i in range(mdp.A)] for j in range(mdp.S)]
     old_Q = Q
@@ -126,5 +126,5 @@ def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 
         # average reward for the episode?
 
         n_episode += 1
-        print "Episode: %d" % n_episode
+        # print "Episode: %d" % n_episode
     return Q, total_reward/max_episode, max_reward, rewards_per_episode, Q_variances

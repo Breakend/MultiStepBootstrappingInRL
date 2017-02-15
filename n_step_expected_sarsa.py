@@ -33,7 +33,7 @@ def target_policy_probs(Q, s, nA, epsilon=.1):
     return A
 
 
-def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
+def n_step_expected_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
     # Initialization
     Q = [[0 for i in range(mdp.A)] for j in range(mdp.S)]
     old_Q = Q
@@ -92,7 +92,7 @@ def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 
             if tau >= 0:
                 # product from i = tau+1 to min(tau+n-1, T-1) \pi(A_i | S_i) / \mu(A_i|S_i)
                 # import pdb; pdb.set_trace()
-                rho = np.prod([target_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]]/behaviour_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]] for k in range(tau+1, min(tau+n, T-1)+1)])
+                rho = np.prod([target_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]]/behaviour_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]] for k in range(tau+1, min(tau+n-1, T-1)+1)])
                 # rho = np.prod([(stored_actions[k % n] == behaviour_policy(Q, stored_states[k% n], mdp.A)) / ((stored_actions[k %n] != np.argmax(Q[stored_states[k%n]][:]))*epsilon*1/mdp.A + (stored_actions[k%n] == np.argmax(Q[stored_states[k%n]][:]))*(epsilon*1/mdp.A + (1-epsilon)))  )])
 
                 # print rho
@@ -102,8 +102,12 @@ def n_step_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 
 
                 # print stored_actions
                 # print stored_states
+                # Q[s][a] = Q[s][a] + alpha*(r + gamma*((1-epsilon)*Q[s_new][best_action]+(epsilon/mdp.A)*sum(Q[s_new][act] for act in range(mdp.A))) - Q[s][a])
+                # import pdb; pdb.set_trace()
+                expected_sarsa_update = sum([target_policy_probs(Q, stored_states[(tau+n) %n], mdp.A)[a] * Q[stored_states[(tau+n) %n]][a] for a in range(mdp.A)])
+
                 if tau + n < T:
-                    G = G + gamma**n * Q[stored_states[(tau+n) %n]][stored_actions[(tau+n) %n]]
+                    G = G + gamma**n * expected_sarsa_update
                 s_tau = stored_states[tau %n]
                 a_tau = stored_actions[tau%n]
 

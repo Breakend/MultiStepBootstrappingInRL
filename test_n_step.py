@@ -4,6 +4,7 @@ from operator import itemgetter
 from mdp_matrix import GridWorld, WindyGridCliffMazeWorld, StochasticGridWorld
 from sarsa import sarsa
 from expected_sarsa import expected_sarsa
+from n_step_expected_sarsa import n_step_expected_sarsa
 from double_sarsa import double_sarsa
 from double_expected_sarsa import double_expected_sarsa
 from n_step_sarsa import n_step_sarsa
@@ -27,7 +28,8 @@ gw = GridWorld(5, test_rewards, terminal_states=[2, 23] )
 
 # print gw.T
 
-Q, ave_reward, max_reward, rewards_per_episode, Q_variances = n_step_sarsa(gw, 20000, alpha=.1, n=10)
+# Q, ave_reward, max_reward, rewards_per_episode, Q_variances = n_step_sarsa(gw, 20000, alpha=.1, n=10)
+Q, ave_reward, max_reward, rewards_per_episode, Q_variances = n_step_expected_sarsa(gw, 20000, alpha=.4, n=10)
 sarsa_Q, ave_reward, max_reward, rewards_per_episode, Q_variances = sarsa(gw, 20000, alpha=.1)
 
 

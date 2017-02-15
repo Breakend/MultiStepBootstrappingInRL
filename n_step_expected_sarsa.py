@@ -10,8 +10,7 @@ def behaviour_policy(Q, s, nA, epsilon=.3):
     In order to use the data from \pi we must take into account the
     difference between the two policies, using their relative
     probability of taking the actions that were taken.
-    NOTE: taken from https://github.com/dennybritz/reinforcement-learning/blob/master/TD/SARSA.ipynb
-    TODO: remove in favour of our own implementation
+    NOTE: Some parts were modified from https://github.com/dennybritz/reinforcement-learning/blob/master/TD/SARSA.ipynb
     """
     A = behaviour_policy_probs(Q, s, nA, epsilon)
     return np.random.choice(range(nA),p= A)
@@ -78,32 +77,22 @@ def n_step_expected_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 
                 stored_rewards[(t+1) % n] = rt1
                 stored_states[(t+1) % n] = st1
 
-                # TODO: is this the right place to put this?
+
                 total_reward += rt1
                 reward_for_episode += rt1
 
-                # if s_{t+1} terminal
+
                 if mdp.is_terminal(st1):
                     T = t + 1
                 else:
                     stored_actions[(t+1) % n] = behaviour_policy(Q, s, mdp.A)
 
-            tau = t - n + 1 # TODO: +1 here?
+            tau = t - n + 1
             if tau >= 0:
-                # product from i = tau+1 to min(tau+n-1, T-1) \pi(A_i | S_i) / \mu(A_i|S_i)
-                # import pdb; pdb.set_trace()
                 rho = np.prod([target_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]]/behaviour_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]] for k in range(tau+1, min(tau+n-1, T-1)+1)])
-                # rho = np.prod([(stored_actions[k % n] == behaviour_policy(Q, stored_states[k% n], mdp.A)) / ((stored_actions[k %n] != np.argmax(Q[stored_states[k%n]][:]))*epsilon*1/mdp.A + (stored_actions[k%n] == np.argmax(Q[stored_states[k%n]][:]))*(epsilon*1/mdp.A + (1-epsilon)))  )])
 
-                # print rho
                 G = np.sum([gamma**(i-tau-1) * stored_rewards[i%n] for i in range(tau+1, min(tau+n, T)+1)])
 
-
-
-                # print stored_actions
-                # print stored_states
-                # Q[s][a] = Q[s][a] + alpha*(r + gamma*((1-epsilon)*Q[s_new][best_action]+(epsilon/mdp.A)*sum(Q[s_new][act] for act in range(mdp.A))) - Q[s][a])
-                # import pdb; pdb.set_trace()
                 expected_sarsa_update = sum([target_policy_probs(Q, stored_states[(tau+n) %n], mdp.A)[a] * Q[stored_states[(tau+n) %n]][a] for a in range(mdp.A)])
 
                 if tau + n < T:
@@ -113,21 +102,12 @@ def n_step_expected_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 
 
                 Q[s_tau][a_tau] += alpha * rho * (G - Q[s_tau][a_tau])
 
-                # print tau
-                # print T
-                # if pi is being learned, ensure that pi(.|S_tau) is \epsilon-greedy wrt Q
-
-
-
         if reward_for_episode > max_reward:
             max_reward = reward_for_episode
 
         rewards_per_episode.append(reward_for_episode)
         Q_variances.append(np.var(Q))
 
-        #TODO: should we instead do an on-policy run here to calculate the
-        # average reward for the episode?
-
         n_episode += 1
-        # print "Episode: %d" % n_episode
+
     return Q, total_reward/max_episode, max_reward, rewards_per_episode, Q_variances

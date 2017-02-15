@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sarsa import sarsa
 
 
-# TODO: change these graphs to be over alpha like in the paper
+# TODO: Change this to stochastic gridworld
 
 test_rewards = [[i, j, -1.0] for i in range(10) for j in range(10)]
 test_rewards[59] = [5, 9, 50]

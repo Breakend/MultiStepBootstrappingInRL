@@ -73,7 +73,6 @@ def n_step_tree_backup(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1
                 # Take action A_t
                 # Observe and store the next reward R_{t+1} and next state S_{t+1}
                 st1 = np.random.choice(range(mdp.S), p = mdp.T[stored_states[t%n], stored_actions[t % n], :])
-
                 r = mdp.R[st1]
 
                 stored_states[(t+1) % n] = st1
@@ -85,17 +84,18 @@ def n_step_tree_backup(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1
                 # if s_{t+1} terminal
                 if mdp.is_terminal(st1):
                     T = t + 1
-                    stored_deltas[t%n] = r - stored_Qs[t%n]
+                    stored_deltas[t%n] = r - stored_Qs[t%(n+1)]
                 else:
                     # Store R + ... as sigma_t
-                    stored_deltas[t%n] = r + gamma*sum([behaviour_policy_probs(Q, st1, mdp.A)[a]*Q[st1][a] for a in range(mdp.A)]) - stored_Qs[t%n]
+                    expectedQ = sum([behaviour_policy_probs(Q, st1, mdp.A)[a]*Q[st1][a] for a in range(mdp.A)])
+                    stored_deltas[t%n] = r + gamma*expectedQ - stored_Qs[t%(n+1)]
 
                     # Select arbitrarily and store and action as A_t+1
                     at1 = behaviour_policy(Q, s, mdp.A)
                     stored_actions[(t+1) % n] = at1
 
                     # Store Q(st1|At1)
-                    stored_Qs[(t+1) % n] = Q[st1][at1]
+                    stored_Qs[(t+1) % (n+1)] = Q[st1][at1]
                     # print "tau " + str(tau)
                     # print "t :" + str(t)
                     # print "T : " + str(T)
@@ -105,15 +105,18 @@ def n_step_tree_backup(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1
 
             tau = t - n + 1 # TODO: +1 here?
             if tau >= 0:
-                E = 1
-                G = stored_Qs[tau % n]
+                E = 1.0
+                G = stored_Qs[tau % (n+1)]
 #                 print "first:" + str(tau+n-1)
 #                 print "second:" + str(T-1)
 
                 for k in range(tau, min(tau+n-1, T-1)+1):
+                    if k >= tau + 1:
+                        E = np.prod([ gamma* stored_bp[(l%n)] for l in range(tau+1, k+1)])
+                    if E == 0:
+                        E = 1
                     G = G + E * stored_deltas[k%n]
-#                     print stored_bp
-                    E = gamma * E * stored_bp[(k+1)%n]
+                    # E = gamma * E * stored_bp[(k+1)%n]
 
                 s_tau = stored_states[tau%n]
                 a_tau = stored_actions[tau%n]

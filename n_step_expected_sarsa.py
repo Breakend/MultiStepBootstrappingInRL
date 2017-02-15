@@ -91,7 +91,7 @@ def n_step_expected_sarsa(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 
             if tau >= 0:
                 rho = np.prod([target_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]]/behaviour_policy_probs(Q, stored_states[k%n], mdp.A)[stored_actions[k%n]] for k in range(tau+1, min(tau+n-1, T-1)+1)])
 
-                G = np.sum([gamma**(i-tau-1) * stored_rewards[i%n] for i in range(tau+1, min(tau+n, T)+1)])
+                G = np.sum([gamma**(i-tau-1) * stored_rewards[i%n] for i in range(tau+1, min(tau+n-1, T-1)+1)])
 
                 expected_sarsa_update = sum([target_policy_probs(Q, stored_states[(tau+n) %n], mdp.A)[a] * Q[stored_states[(tau+n) %n]][a] for a in range(mdp.A)])
 

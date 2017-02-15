@@ -32,7 +32,7 @@ def target_policy_probs(Q, s, nA, epsilon=.1):
     A[best_action] += (1.0 - epsilon)
     return A
 
-def n_step_tree(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
+def n_step_tree_backup(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
     # Initialization
     Q = [[0 for i in range(mdp.A)] for j in range(mdp.S)]
     n_episode = 0
@@ -63,6 +63,8 @@ def n_step_tree(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 1
         stored_states[0] = s
         stored_Qs[0] = Q[s][stored_actions[0]]
         stored_bp[0] = behaviour_policy_probs(Q, s, mdp.A)[stored_actions[0]]
+        for i in range(1, n):
+            stored_bp[i] = 0.
         reward_for_episode = 0
 
         while tau < (T-1):
@@ -89,13 +91,17 @@ def n_step_tree(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 1
                     stored_deltas[t%n] = r + gamma*sum([behaviour_policy_probs(Q, st1, mdp.A)[a]*Q[st1][a] for a in range(mdp.A)]) - stored_Qs[t%n]
 
                     # Select arbitrarily and store and action as A_t+1
-                    stored_actions[(t+1) % n] = behaviour_policy(Q, s, mdp.A)
+                    at1 = behaviour_policy(Q, s, mdp.A)
+                    stored_actions[(t+1) % n] = at1
 
                     # Store Q(st1|At1)
-                    stored_Qs[(t+1) % n] = Q[st1][stored_actions[(s)]]
-
+                    stored_Qs[(t+1) % n] = Q[st1][at1]
+                    # print "tau " + str(tau)
+                    # print "t :" + str(t)
+                    # print "T : " + str(T)
                     # Store behaviour policy as pi_t1
-                    stored_bp[(t+1) % n] = behaviour_policy_probs(Q, stored_actions[(t+1) % n], mdp.A)[stored_actions[(t+1)%n]]
+                    stored_bp[(t+1) % n] = behaviour_policy_probs(Q, st1, mdp.A)[at1]
+
 
             tau = t - n + 1 # TODO: +1 here?
             if tau >= 0:
@@ -103,6 +109,7 @@ def n_step_tree(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 1
                 G = stored_Qs[tau % n]
 #                 print "first:" + str(tau+n-1)
 #                 print "second:" + str(T-1)
+
                 for k in range(tau, min(tau+n-1, T-1)+1):
                     G = G + E * stored_deltas[k%n]
 #                     print stored_bp
@@ -124,5 +131,5 @@ def n_step_tree(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 1
         # average reward for the episode?
 
         n_episode += 1
-        print "Episode: %d" % n_episode
+        # print "Episode: %d" % n_episode
     return Q, total_reward/max_episode, max_reward, rewards_per_episode, Q_variances

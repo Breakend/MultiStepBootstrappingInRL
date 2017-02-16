@@ -4,6 +4,8 @@ from n_step_sarsa import n_step_sarsa
 from n_step_expected_sarsa import n_step_expected_sarsa
 from q_sigma import n_step_q_sigma
 from n_step_tree_backup import n_step_tree_backup
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from joblib import Parallel, delayed
@@ -39,9 +41,9 @@ epsilon = .1
 max_episode=10000
 # alphas = [x for x in np.arange(0.0, 1., .05)]
 # alphas[0] = .01
-alpha = 0.1
+alpha = 0.15
 gamma = 0.9
-n_step_values = [x for x in np.arange(0, 55, 5)]
+n_step_values = [x for x in np.arange(0, 12, 2)]
 n_step_values[0] = 1
 
 # import pdb; pdb.set_trace()
@@ -117,7 +119,7 @@ ax = plt.gca()
 # ax.set_xscale('symlog')
 ax.legend(loc='upper center', shadow=True)
 plt.savefig('q_variance.png')
-
+plt.close()
 
 # TODO: plot all sarsa, expected_sarsa, double_Sarsa
 # import pdb; pdb.set_trace()
@@ -136,7 +138,7 @@ ax = plt.gca()
 # ax.set_xscale('symlog')
 ax.legend(loc='lower center', shadow=True)
 plt.savefig('average_reward.png')
-
+plt.close()
 # import pdb; pdb.set_trace()
 
 # print("Max alpha SARSA: %f" % alphas[np.argmax(average_reward_sarsa)])

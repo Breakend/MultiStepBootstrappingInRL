@@ -136,7 +136,7 @@ ax = plt.gca()
 # ax.set_xscale('symlog')
 ax.legend(loc='upper center', shadow=True)
 plt.savefig('q_variance.png')
-
+plt.close()
 
 # TODO: plot all sarsa, expected_sarsa, double_Sarsa
 # import pdb; pdb.set_trace()
@@ -164,7 +164,7 @@ ax = plt.gca()
 # ax.set_xscale('symlog')
 ax.legend(loc='lower center', shadow=True)
 plt.savefig('average_reward.png')
-
+plt.close()
 # import pdb; pdb.set_trace()
 
 print("Max alpha SARSA: %f" % alphas[np.argmax(average_reward_sarsa)])
@@ -211,3 +211,4 @@ ax = plt.gca()
 # ax.set_xscale('symlog')
 ax.legend(loc='upper center', shadow=True)
 plt.savefig('variance_reward.png')
+plt.close()

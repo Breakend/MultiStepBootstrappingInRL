@@ -81,6 +81,8 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
 
         for i in range(1, n):
             stored_bp[i] = 0.
+        for i in range(1, n):
+            stored_sigmas[i] = 0.
         reward_for_episode = 0
 
         while tau < (T-1):
@@ -133,11 +135,20 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
 #                 print "second:" + str(T-1)
 
                 for k in range(tau, min(tau+n-1, T-1)+1):
-                    if k >= tau + 1:
-                        E = np.prod([ gamma* (stored_sigmas[l%n] * stored_bp[(l%n)] + stored_sigmas[l%n]) for l in range(tau+1, k+1)])
+                    # NON ONLINE VERSION
+                    # if k >= tau + 1:
+                    #     E = np.prod([ gamma* (stored_sigmas[l%n] * stored_bp[(l%n)] + stored_sigmas[l%n]) for l in range(tau+1, k+1)])
+                    # if E == 0:
+                    #     E = 1
+                    # G = G + E * stored_deltas[k%n]
+                    # rho *= (1 - stored_sigmas[k%n] + stored_sigmas[k%n]*stored_rhos[k%n])
+
+                    G = G + E * stored_deltas[k%n]
+                    E *= gamma * (stored_sigmas[(k+1)%n] * stored_bp[((k+1)%n)] + stored_sigmas[(k+1)%n])
+                    # if k >= tau + 1:
+                    #     E = np.prod([ gamma*  for l in range(tau+1, k+1)])
                     if E == 0:
                         E = 1
-                    G = G + E * stored_deltas[k%n]
                     rho *= (1 - stored_sigmas[k%n] + stored_sigmas[k%n]*stored_rhos[k%n])
                     # E = gamma * E * stored_bp[(k+1)%n]
 

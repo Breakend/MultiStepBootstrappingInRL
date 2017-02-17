@@ -111,11 +111,12 @@ def n_step_tree_backup(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1
 #                 print "second:" + str(T-1)
 
                 for k in range(tau, min(tau+n-1, T-1)+1):
-                    if k >= tau + 1:
-                        E = np.prod([ gamma* stored_bp[(l%n)] for l in range(tau+1, k+1)])
+                    G = G + E * stored_deltas[k%n]
+                    E *= gamma*stored_bp[((k+1)%n)]
+                    # if k >= tau + 1:
+                        # E = np.prod([ gamma* stored_bp[(l%n)] for l in range(tau+1, k+1)])
                     if E == 0:
                         E = 1
-                    G = G + E * stored_deltas[k%n]
                     # E = gamma * E * stored_bp[(k+1)%n]
 
                 s_tau = stored_states[tau%n]

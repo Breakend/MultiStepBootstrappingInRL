@@ -86,6 +86,8 @@ for r in range(number_of_runs):
         all_rewards_per_episode_double_expected_sarsa.append(all_rewards)
         Q, average_reward, max_reward, all_rewards, Q_variances = sarsa(gw, n, epsilon=epsilon, alpha=alpha)
         q_var_sarsa.append(Q_variances)
+        average_reward_sarsa.append(average_reward)
+        all_rewards_per_episode_sarsa.append(all_rewards)
         print("Done  sarsa")
 
     n_step_sarsa_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_sarsa)(gw, max_episode, alpha, gamma, epsilon, n=4) for alpha in alphas)

@@ -64,7 +64,7 @@ q_var_n_step_q_sigma = []
 
 epsilon = .1
 
-n=2000
+n=20000
 alphas = [x for x in np.arange(0.0, 1., .1)]
 alphas[0] = .01
 # import pdb; pdb.set_trace()

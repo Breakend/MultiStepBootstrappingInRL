@@ -1,5 +1,7 @@
 import numpy as np
 import sys
+import sklearn
+from sklearn.preprocessing import normalize
 
 def behaviour_policy(Q, s, nA, epsilon=.3):
     """
@@ -32,13 +34,27 @@ def target_policy_probs(Q, s, nA, epsilon=.1):
     A[best_action] += (1.0 - epsilon)
     return A
 
-def select_sigma(Q, s, a, nA):
+def select_sigma(Q, s, a, nA, last_n_variances):
     """
     The idea is that you should be able to choose a sigma based off of a function of
     variables, but here we simply choose a uniform distribution for now.
     Idea is to swap this out for other functions in experiments
     """
-    return np.random.randint(2, size=nA)[a]
+    # Take the max norm of the last N variances
+    # import pdb; pdb.set_trace()
+    last_n_variances = normalize(last_n_variances.reshape(-1, 1), 'max').reshape(-1)
+    # print(np.mean(last_n_variances))
+    # print( np.mean(last_n_variances[-1]) )
+    if np.mean(last_n_variances) == 0:
+        # no data defaults to uniform distribution
+        return np.random.randint(2, size=nA)[a]
+
+    if last_n_variances[-1] > np.mean(last_n_variances):
+        #if the variance is increasing, don't favour sampling
+        # print "test"
+        return 0
+    else:
+        return 1
 
 
 def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n = 10):
@@ -49,7 +65,7 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
     Q_variances = []
     max_reward = 0
     total_reward = 0
-
+    last_n_variances = np.zeros(n)
     # TODO: make sigma able to be configured
 
     while n_episode < max_episode:
@@ -58,7 +74,6 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
             s = mdp.initial_state # Initialize s, starting state
         except AttributeError:
             s = 0
-
         # initializations
         T = sys.maxint
         tau = 0
@@ -76,7 +91,7 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
         stored_states[0] = s
         stored_Qs[0] = Q[s][stored_actions[0]]
         stored_bp[0] = behaviour_policy_probs(Q, s, mdp.A)[stored_actions[0]]
-        stored_sigmas[0] = select_sigma(Q, s, stored_actions[0], mdp.A)
+        stored_sigmas[0] = select_sigma(Q, s, stored_actions[0], mdp.A, last_n_variances)
         stored_rhos[0] = target_policy_probs(Q, s, mdp.A)[stored_actions[0]] / behaviour_policy_probs(Q, s, mdp.A)[stored_actions[0]]
 
         for i in range(1, n):
@@ -108,7 +123,7 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
                     stored_actions[(t+1) % n] = at1
 
                     # select and store sigma
-                    stored_sigmas[(t+1)%n] = sigma = select_sigma(Q, st1, at1, mdp.A)
+                    stored_sigmas[(t+1)%n] = sigma = select_sigma(Q, st1, at1, mdp.A, last_n_variances)
 
                     # Store Q(st1|At1)
                     stored_Qs[(t+1) % (n+1)] = Q[st1][at1]
@@ -159,6 +174,8 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
                 # rho = np.prod([ (1- stored_sigmas[k]) for k in range(tau+1, min(tau+n, T-1)+1)])
 
                 Q[s_tau][a_tau] += alpha * rho * (G - Q[s_tau][a_tau])
+                # import pdb; pdb.set_trace()
+                last_n_variances[t%n] = np.var(Q)
                 # if pi is being learned, ensure that pi(.|S_tau) is \epsilon-greedy wrt Q
 
         if reward_for_episode > max_reward:

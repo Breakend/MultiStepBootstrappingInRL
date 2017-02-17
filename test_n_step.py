@@ -9,7 +9,7 @@ from double_sarsa import double_sarsa
 from double_expected_sarsa import double_expected_sarsa
 from n_step_sarsa import n_step_sarsa
 from n_step_tree_backup import n_step_tree_backup
-from q_sigma import n_step_q_sigma
+from q_sigma_with_varianced_sigma import n_step_q_sigma
 
 start_state = [0, 0]
 

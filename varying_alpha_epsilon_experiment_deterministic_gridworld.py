@@ -9,12 +9,15 @@ from expected_sarsa import expected_sarsa
 from double_expected_sarsa import double_expected_sarsa
 import matplotlib.pyplot as plt
 from sarsa import sarsa
+from joblib import Parallel, delayed
 
 start_state = [0, 0]
 
 test_rewards = [[i, j, -1] for i in range(5) for j in range(5)]
 test_rewards[2] = [0, 2, 1]
 test_rewards[23] = [4,3, 1]
+
+gamma=.9
 
 start_state = [0, 0]
 
@@ -60,7 +63,7 @@ q_var_n_step_q_sigma = []
 epsilon = .1
 
 n=10000
-alphas = [x for x in np.arange(0.0, 1., .05)]
+alphas = [x for x in np.arange(0.0, 1., .1)]
 alphas[0] = .01
 # import pdb; pdb.set_trace()
 
@@ -90,7 +93,7 @@ for r in range(number_of_runs):
         all_rewards_per_episode_sarsa.append(all_rewards)
         print("Done  sarsa")
 
-    n_step_sarsa_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_sarsa)(gw, max_episode, alpha, gamma, epsilon, n=4) for alpha in alphas)
+    n_step_sarsa_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_sarsa)(gw, n, alpha, gamma, epsilon, n=4) for alpha in alphas)
     # Q, average_reward, max_reward, all_rewards, Q_variances = n_step_sarsa(gw, max_episode, epsilon=epsilon, alpha=alpha, n = n_step)
     for result in n_step_sarsa_results:
         average_reward_n_step_sarsa.append(result[1])
@@ -98,7 +101,7 @@ for r in range(number_of_runs):
         all_rewards_per_episode_n_step_sarsa.append(result[3])
     print("Done nstep sarsa")
 
-    n_step_expected_sarsa_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_expected_sarsa)(gw, max_episode, alpha, gamma, epsilon, n=4) for alpha in alphas)
+    n_step_expected_sarsa_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_expected_sarsa)(gw, n, alpha, gamma, epsilon, n=4) for alpha in alphas)
     # Q, average_reward, max_reward, all_rewards, Q_variances = n_step_sarsa(gw, max_episode, epsilon=epsilon, alpha=alpha, n = n_step)
     for result in n_step_expected_sarsa_results:
         average_reward_n_step_expected_sarsa.append(result[1])
@@ -106,7 +109,7 @@ for r in range(number_of_runs):
         all_rewards_per_episode_n_step_expected_sarsa.append(result[3])
     print("Done nstep expected sarsa")
 
-    n_step_tree_backup_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_tree_backup)(gw, max_episode, alpha, gamma, epsilon, n) for alpha in alphas)
+    n_step_tree_backup_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_tree_backup)(gw, n, alpha, gamma, epsilon, n) for alpha in alphas)
     # Q, average_reward, max_reward, all_rewards, Q_variances = n_step_tree_backup(gw, max_episode, epsilon=epsilon, alpha=alpha, n = n_step)
     for result in n_step_tree_backup_results:
         average_reward_n_step_tree_backup.append(result[1])
@@ -114,7 +117,7 @@ for r in range(number_of_runs):
         all_rewards_per_episode_n_step_tree_backup.append(result[3])
     print("Done nstep tree backup")
 
-    n_step_q_sigma_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_q_sigma)(gw, max_episode, alpha, gamma, epsilon, n) for alpha in alphas)
+    n_step_q_sigma_results = Parallel(n_jobs=-2, verbose=10)(delayed(n_step_q_sigma)(gw, n, alpha, gamma, epsilon, n) for alpha in alphas)
     # Q, average_reward, max_reward, all_rewards, Q_variances = n_step_q_sigma(gw, max_episode, epsilon=epsilon, alpha=alpha, n = n_step)
     for result in n_step_q_sigma_results:
         average_reward_n_step_q_sigma.append(result[1])

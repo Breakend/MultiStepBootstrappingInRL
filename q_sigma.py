@@ -144,7 +144,9 @@ def n_step_q_sigma(mdp, max_episode, alpha = 0.1, gamma = 0.9, epsilon = 0.1, n 
                     # rho *= (1 - stored_sigmas[k%n] + stored_sigmas[k%n]*stored_rhos[k%n])
 
                     G = G + E * stored_deltas[k%n]
-                    E *= gamma * (stored_sigmas[(k+1)%n] * stored_bp[((k+1)%n)] + stored_sigmas[(k+1)%n])
+                    factor = (1 - stored_sigmas[(k+1)%n]) * stored_bp[((k+1)%n)] + stored_sigmas[(k+1)%n]
+                    # print factor
+                    E *= gamma * factor
                     # if k >= tau + 1:
                     #     E = np.prod([ gamma*  for l in range(tau+1, k+1)])
                     if E == 0:

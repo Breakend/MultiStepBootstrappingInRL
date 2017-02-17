@@ -31,7 +31,7 @@ gw = GridWorld(5, test_rewards, terminal_states=[2, 23] )
 # print gw.T
 
 # Q, ave_reward, max_reward, rewards_per_episode, Q_variances = n_step_sarsa(gw, 20000, alpha=.1, n=10)
-Q, ave_reward, max_reward, rewards_per_episode, Q_variances = n_step_q_sigma(gw, 20000, alpha=.1, n=4)
+Q, ave_reward, max_reward, rewards_per_episode, Q_variances = n_step_q_sigma(gw, 20000, alpha=.7, n=4)
 sarsa_Q, ave_reward, max_reward, rewards_per_episode, Q_variances = sarsa(gw, 20000, alpha=.1)
 
 

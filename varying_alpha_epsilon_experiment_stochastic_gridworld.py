@@ -7,6 +7,8 @@ from n_step_tree_backup import n_step_tree_backup
 from q_sigma import n_step_q_sigma
 from expected_sarsa import expected_sarsa
 from double_expected_sarsa import double_expected_sarsa
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sarsa import sarsa
 from joblib import Parallel, delayed
